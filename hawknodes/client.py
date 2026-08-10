@@ -37,6 +37,9 @@ RETRY_STATUSES = frozenset({408, 409, 425, 429, 500, 502, 503, 504})
 TERMINAL_OK = frozenset({"completed", "succeeded", "success"})
 TERMINAL_FAIL = frozenset({"failed", "error", "canceled", "cancelled"})
 
+#: Sent on every request. Default library agent strings draw a 403 from the edge proxy.
+USER_AGENT = "HawkNodes/0.1 (ComfyUI custom node)"
+
 
 class AtlasError(RuntimeError):
     """Any Atlas API failure. The message is shown on the node, so it carries the
@@ -100,6 +103,8 @@ def _headers(api_key: str) -> dict[str, str]:
     return {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": USER_AGENT,
     }
 
 

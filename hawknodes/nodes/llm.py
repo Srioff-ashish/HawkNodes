@@ -30,6 +30,9 @@ from .common import (
 
 logger = logging.getLogger("HawkNodes")
 
+#: Atlas takes an int32 seed. Anything larger comes back as a bare 400.
+MAX_SEED = 2147483647
+
 
 def _content_parts(text: str, image_uris: list[str], detail: str) -> list[dict]:
     parts: list[dict] = [{"type": "text", "text": text}]
@@ -94,7 +97,10 @@ class HawkAtlasLLM(IO.ComfyNode):
                     "seed",
                     default=0,
                     min=0,
-                    max=0xFFFFFFFFFFFFFFFF,
+                    # int32, not int64: Atlas rejects an out-of-range seed with a
+                    # bare 400 "bad request", and `randomize` on a 64-bit widget
+                    # produces one almost every time.
+                    max=MAX_SEED,
                     control_after_generate=True,
                     tooltip=(
                         "ComfyUI reuses a cached result when nothing changes, so bump "
@@ -335,7 +341,9 @@ class HawkAtlasLLM(IO.ComfyNode):
             "stream": False,
         }
         if seed > 0:
-            payload["seed"] = seed
+            # Workflows saved before the widget was capped can still carry a
+            # 64-bit seed, so clamp on the way out rather than trusting the range.
+            payload["seed"] = seed % (MAX_SEED + 1)
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
         if stop.strip():
@@ -360,21 +368,39 @@ class HawkAtlasLLM(IO.ComfyNode):
                 api_url, key, payload, timeout=timeout, max_retries=max_retries
             )
         except AtlasError as exc:
-            # Atlas answers an unknown model with a bare 400 "not found", which
-            # says nothing about which field was wrong. Name the model instead.
+            # A 400 from Atlas carries no field name at all -- just "not found"
+            # or "bad request" -- so spell out what we sent alongside it.
             message = str(exc)
-            if "400" in message and "not found" in message.lower():
-                raise AtlasError(
-                    f"Atlas rejected the model id {slug!r} (400 not found). That model "
-                    f"is not available on your account.\n\n"
-                    f"List the ids you can actually use:\n"
+            if "400" not in message:
+                raise
+
+            sent = ", ".join(
+                f"{name}={value!r}"
+                for name, value in payload.items()
+                if name != "messages"
+            )
+            if image_uris:
+                sent += f", images={len(image_uris)}"
+
+            if "not found" in message.lower():
+                cause = (
+                    f"The model id {slug!r} is not available on your account. List the "
+                    f"ids you can use:\n"
                     f"    curl -s {normalize_chat_url(api_url)}/models "
-                    f"-H \"Authorization: Bearer $ATLAS_API_KEY\"\n\n"
-                    f"Then set `model` to `{registry.CUSTOM_SLUG}` and put a working id in "
-                    f"`model_override`, or add it to models.json.\n\n"
-                    f"Original error: {message}"
-                ) from None
-            raise
+                    f'-H "Authorization: Bearer $ATLAS_API_KEY"\n'
+                    f"Then pick `{registry.CUSTOM_SLUG}` and put a working id in "
+                    f"`model_override`, or add it to models.json."
+                )
+            else:
+                cause = (
+                    f"Atlas rejected a parameter rather than the model. Most likely "
+                    f"suspects, in order: `seed` out of range (must fit in int32), a "
+                    f"parameter in `extra_body_json` this model does not accept, "
+                    f"`json_mode` on a model without JSON support, or images sent to "
+                    f"{slug!r} which may not accept them. Try seed=0 first."
+                )
+
+            raise AtlasError(f"{cause}\n\nSent: {sent}\n\nAtlas said: {message}") from None
 
         text = extract_message_text(response)
 

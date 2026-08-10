@@ -132,13 +132,21 @@ def _discover_at_import() -> None:
 
     import urllib.request
 
+    from .client import USER_AGENT
+
     base = os.environ.get("ATLAS_API_URL", "https://api.atlascloud.ai/v1").strip().rstrip("/")
     if not base.endswith("/v1"):
         base = f"{base}/v1"
 
     try:
         request = urllib.request.Request(
-            f"{base}/models", headers={"Authorization": f"Bearer {api_key}"}
+            f"{base}/models",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                # urllib's default agent string gets 403'd by the edge proxy.
+                "User-Agent": USER_AGENT,
+                "Accept": "application/json",
+            },
         )
         with urllib.request.urlopen(request, timeout=DISCOVERY_TIMEOUT) as response:
             payload = json.load(response)
