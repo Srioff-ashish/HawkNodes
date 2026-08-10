@@ -121,16 +121,24 @@ every time.
 
 ## Model lists
 
-`models.json` seeds the dropdowns. Atlas serves 400+ models and publishes no
-machine-readable index, so it is a curated starting point rather than a full catalogue.
+**Set `ATLAS_API_KEY` before starting ComfyUI and the dropdown fills itself in.** At startup
+the pack calls `GET /v1/models` (~105 chat models at the time of writing) and caches the
+result to `.models_cache.json`, refreshed daily. If discovery fails for any reason it logs
+one line and falls back to the bundled list — it never delays or breaks startup.
 
-After your first successful LLM call, the pack queries `GET /v1/models` and caches whatever
-it finds to `.models_cache.json`. Those models join the dropdown **after the next ComfyUI
-restart** — dropdowns are built at startup. Discovered models whose id looks multimodal
-(`*-vl-*`, `*vision*`, `gemini*`, `claude*`, …) automatically get image inputs.
+Without the environment variable, the dropdown shows `models.json` plus anything cached from
+a previous run. Discovery still runs after your first successful call, so those models appear
+on the next restart.
 
-Until then, `custom (use model_override)` reaches any model, including vision models.
-To make a model permanent, add it to `models.json`.
+Model ids whose name looks multimodal (`*-VL-*`, `*vision*`, `gemini*`, `claude*`, …) get
+image inputs automatically.
+
+> **Atlas model ids are case-sensitive and vendor-prefixed** — `deepseek-ai/DeepSeek-V3-0324`,
+> `Qwen/Qwen3-Coder`, `zai-org/GLM-4.6`. The short names in Atlas's own documentation
+> (`deepseek-v3`, `glm`, `minimax`) are marketing labels and are **rejected with a 400**.
+
+`custom (use model_override)` reaches any model at any time. To make one permanent, add it to
+`models.json`.
 
 ---
 
@@ -166,7 +174,8 @@ Several documents at once
 | `Model is set to custom but model_override is empty` | type a model id into `model_override` |
 | Reply ignores your document | read the `context_used` output; the document may have produced no text |
 | Same result on every run | ComfyUI's cache — bump `seed` or set it to randomize |
-| `Atlas API error 400` | the model rejected a parameter; try `size: default (model)`, or move it into `extra_params` |
+| `400 ... "not found"` | the model id does not exist on your account. Ids are case-sensitive; `curl -s https://api.atlascloud.ai/v1/models -H "Authorization: Bearer $ATLAS_API_KEY"` lists valid ones |
+| `Atlas API error 400` (image nodes) | the model rejected a parameter; try `size: default (model)`, or move it into `extra_params` |
 | `.doc` fails | install `antiword`, or save the file as `.docx` |
 
 ---

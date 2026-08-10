@@ -1,11 +1,14 @@
 {
   "_comment": [
-    "Starting model lists for the HawkNodes dropdowns. Atlas serves 400+ models and",
-    "publishes no machine-readable index, so this file is a curated seed rather than a",
-    "complete catalogue. After the first successful chat call the LLM dropdown also",
-    "merges whatever GET /v1/models reports (cached in .models_cache.json, visible",
-    "after a ComfyUI restart). For anything not listed, pick the `custom` option and",
-    "type the id into `model_override`.",
+    "Starting model lists for the HawkNodes dropdowns.",
+    "",
+    "The `llm` ids below are confirmed present on GET /v1/models, which reports ~105",
+    "chat models -- far more than are listed here. Set ATLAS_API_KEY before starting",
+    "ComfyUI and the pack pulls the full list at startup, caching it to",
+    ".models_cache.json. For anything still missing, pick the `custom` option and type",
+    "the id into `model_override`. Atlas model ids are CASE SENSITIVE and mostly",
+    "vendor-prefixed; the short names in Atlas's own docs (deepseek-v3, glm, minimax)",
+    "are marketing labels and are rejected with a 400.",
     "",
     "`params` selects which widget group a model shows in the image nodes. Only the",
     "gpt-image-2 groups are confirmed against a working implementation; `generic`",
@@ -14,14 +17,22 @@
   ],
 
   "llm": [
-    { "slug": "deepseek-v3", "vision": false },
     { "slug": "deepseek-ai/DeepSeek-V3-0324", "vision": false },
+    { "slug": "deepseek-ai/DeepSeek-V3.1", "vision": false },
+    { "slug": "deepseek-ai/DeepSeek-V3.1-Terminus", "vision": false },
+    { "slug": "deepseek-ai/DeepSeek-V3.2-Exp", "vision": false },
+    { "slug": "deepseek-ai/deepseek-r1-0528", "vision": false },
     { "slug": "moonshotai/Kimi-K2-Instruct", "vision": false },
+    { "slug": "moonshotai/Kimi-K2-Instruct-0905", "vision": false },
     { "slug": "qwen/qwen3-32b", "vision": false },
-    { "slug": "qwen-turbo", "vision": false },
-    { "slug": "glm", "vision": false },
-    { "slug": "minimax", "vision": false },
-    { "slug": "doubao", "vision": false }
+    { "slug": "Qwen/Qwen3-Coder", "vision": false },
+    { "slug": "Qwen/Qwen3-235B-A22B-Instruct-2507", "vision": false },
+    { "slug": "Qwen/Qwen3-Next-80B-A3B-Instruct", "vision": false },
+    { "slug": "Qwen/Qwen3-Next-80B-A3B-Thinking", "vision": false },
+    { "slug": "Qwen/Qwen3-30B-A3B-Instruct-2507", "vision": false },
+    { "slug": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B", "vision": false },
+    { "slug": "zai-org/GLM-4.6", "vision": false },
+    { "slug": "MiniMaxAI/MiniMax-M2", "vision": false }
   ],
 
   "t2i": [

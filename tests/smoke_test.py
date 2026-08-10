@@ -401,7 +401,7 @@ async def main() -> int:
     parser.add_argument("--key", default=os.environ.get("ATLAS_API_KEY", ""))
     parser.add_argument("--api-url", default=client.DEFAULT_CHAT_URL)
     parser.add_argument("--image-url", default=client.DEFAULT_IMAGE_URL)
-    parser.add_argument("--model", default="deepseek-v3")
+    parser.add_argument("--model", default="deepseek-ai/DeepSeek-V3-0324")
     parser.add_argument("--vision-model", default="", help="a vision-capable model id")
     parser.add_argument("--t2i-model", default="openai/gpt-image-2/text-to-image")
     parser.add_argument("--i2i-model", default="openai/gpt-image-2/edit")

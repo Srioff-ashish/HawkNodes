@@ -10,8 +10,10 @@ from comfy_api.latest import IO
 from .. import registry
 from ..client import (
     DEFAULT_CHAT_URL,
+    AtlasError,
     chat_completion,
     extract_message_text,
+    normalize_chat_url,
     resolve_api_key,
 )
 from ..documents import DocumentPart, assemble_context, extract_document
@@ -353,9 +355,27 @@ class HawkAtlasLLM(IO.ComfyNode):
             payload.update(extra)
 
         # ---- call -------------------------------------------------------------
-        response = await chat_completion(
-            api_url, key, payload, timeout=timeout, max_retries=max_retries
-        )
+        try:
+            response = await chat_completion(
+                api_url, key, payload, timeout=timeout, max_retries=max_retries
+            )
+        except AtlasError as exc:
+            # Atlas answers an unknown model with a bare 400 "not found", which
+            # says nothing about which field was wrong. Name the model instead.
+            message = str(exc)
+            if "400" in message and "not found" in message.lower():
+                raise AtlasError(
+                    f"Atlas rejected the model id {slug!r} (400 not found). That model "
+                    f"is not available on your account.\n\n"
+                    f"List the ids you can actually use:\n"
+                    f"    curl -s {normalize_chat_url(api_url)}/models "
+                    f"-H \"Authorization: Bearer $ATLAS_API_KEY\"\n\n"
+                    f"Then set `model` to `{registry.CUSTOM_SLUG}` and put a working id in "
+                    f"`model_override`, or add it to models.json.\n\n"
+                    f"Original error: {message}"
+                ) from None
+            raise
+
         text = extract_message_text(response)
 
         # Cheap once-per-session model discovery, now that we know the key works.

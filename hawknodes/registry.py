@@ -16,6 +16,7 @@ import json
 import logging
 import os
 import re
+import time
 
 from comfy_api.latest import IO
 
@@ -24,6 +25,11 @@ logger = logging.getLogger("HawkNodes")
 _PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _MODELS_FILE = os.path.join(_PACKAGE_ROOT, "models.json")
 _CACHE_FILE = os.path.join(_PACKAGE_ROOT, ".models_cache.json")
+
+#: How long a cached model list is trusted before startup re-fetches it.
+CACHE_TTL_SECONDS = 24 * 60 * 60
+#: Startup discovery is blocking, so it gets a short leash.
+DISCOVERY_TIMEOUT = 8.0
 
 CUSTOM_SLUG = "custom (use model_override)"
 SIZE_DEFAULT = "default (model)"
@@ -101,6 +107,58 @@ def schedule_refresh(api_url: str, api_key: str) -> None:
         asyncio.get_running_loop().create_task(_refresh(api_url, api_key))
     except Exception as exc:
         logger.debug("HawkNodes: could not schedule model discovery (%s)", exc)
+
+
+def _cache_age() -> float:
+    try:
+        return time.time() - os.path.getmtime(_CACHE_FILE)
+    except OSError:
+        return float("inf")
+
+
+def _discover_at_import() -> None:
+    """Fetch the model list once at startup, when ATLAS_API_KEY is already set.
+
+    Atlas serves far more models than models.json lists, and dropdowns are built
+    at import time -- so without this you would have to run a node once and then
+    restart before the full list appeared. Uses urllib rather than aiohttp
+    because no event loop exists yet, and stays quiet on every failure: model
+    discovery must never delay or break ComfyUI's startup.
+    """
+    api_key = os.environ.get("ATLAS_API_KEY", "").strip()
+    if not api_key or _cache_age() < CACHE_TTL_SECONDS:
+        return
+
+    import urllib.request
+
+    base = os.environ.get("ATLAS_API_URL", "https://api.atlascloud.ai/v1").strip().rstrip("/")
+    if not base.endswith("/v1"):
+        base = f"{base}/v1"
+
+    try:
+        request = urllib.request.Request(
+            f"{base}/models", headers={"Authorization": f"Bearer {api_key}"}
+        )
+        with urllib.request.urlopen(request, timeout=DISCOVERY_TIMEOUT) as response:
+            payload = json.load(response)
+        slugs = [
+            entry["id"]
+            for entry in payload.get("data", [])
+            if isinstance(entry, dict) and entry.get("id")
+        ]
+        if slugs:
+            _write_cache(slugs)
+            logger.info("HawkNodes: %d Atlas models available in the dropdown.", len(slugs))
+    except Exception as exc:
+        logger.info(
+            "HawkNodes: model discovery skipped (%s); using the bundled list. Pick "
+            "`%s` and set `model_override` to reach any other model.",
+            exc,
+            CUSTOM_SLUG,
+        )
+
+
+_discover_at_import()
 
 
 # ----------------------------------------------------------------- LLM options
