@@ -1,0 +1,73 @@
+{
+  "_comment": [
+    "Starting model lists for the HawkNodes dropdowns. Atlas serves 400+ models and",
+    "publishes no machine-readable index, so this file is a curated seed rather than a",
+    "complete catalogue. After the first successful chat call the LLM dropdown also",
+    "merges whatever GET /v1/models reports (cached in .models_cache.json, visible",
+    "after a ComfyUI restart). For anything not listed, pick the `custom` option and",
+    "type the id into `model_override`.",
+    "",
+    "`params` selects which widget group a model shows in the image nodes. Only the",
+    "gpt-image-2 groups are confirmed against a working implementation; `generic`",
+    "sends nothing beyond model/prompt/seed unless you set a size, which keeps",
+    "unfamiliar models from 400-ing on a parameter they do not accept."
+  ],
+
+  "llm": [
+    { "slug": "deepseek-v3", "vision": false },
+    { "slug": "deepseek-ai/DeepSeek-V3-0324", "vision": false },
+    { "slug": "moonshotai/Kimi-K2-Instruct", "vision": false },
+    { "slug": "qwen/qwen3-32b", "vision": false },
+    { "slug": "qwen-turbo", "vision": false },
+    { "slug": "glm", "vision": false },
+    { "slug": "minimax", "vision": false },
+    { "slug": "doubao", "vision": false }
+  ],
+
+  "t2i": [
+    { "slug": "openai/gpt-image-2/text-to-image", "params": "gpt_image_2" },
+    { "slug": "seedream-3.0", "params": "generic" },
+    { "slug": "bytedance/seedream-v5.0-pro/text-to-image", "params": "generic" },
+    { "slug": "qwen-image-3.0/text-to-image", "params": "generic" },
+    { "slug": "google/nano-banana-2-lite/text-to-image", "params": "generic" },
+    { "slug": "google/imagen4", "params": "generic" },
+    { "slug": "black-forest-labs/flux-dev", "params": "generic" },
+    { "slug": "recraft-ai/recraft-v3", "params": "generic" },
+    { "slug": "reve-ai/reve-2.1/text-to-image", "params": "generic" }
+  ],
+
+  "edit": [
+    { "slug": "openai/gpt-image-2/edit", "params": "gpt_image_2_edit" },
+    { "slug": "qwen-image-3.0/edit", "params": "generic" },
+    { "slug": "google/nano-banana-2-lite/edit", "params": "generic" },
+    { "slug": "bytedance/seedream-v5.0-pro/edit", "params": "generic" },
+    { "slug": "black-forest-labs/flux-fill-dev", "params": "generic" },
+    { "slug": "reve-ai/reve-2.1/edit", "params": "generic" }
+  ],
+
+  "sizes": {
+    "gpt_image_2": [
+      "1024x1024",
+      "1024x768",
+      "768x1024",
+      "1024x1536",
+      "1536x1024",
+      "1920x1080",
+      "1080x1920",
+      "2560x1440",
+      "1440x2560",
+      "3840x2160",
+      "2160x3840"
+    ],
+    "generic": [
+      "default (model)",
+      "1024x1024",
+      "1024x768",
+      "768x1024",
+      "1024x1536",
+      "1536x1024",
+      "1920x1080",
+      "1080x1920"
+    ]
+  }
+}

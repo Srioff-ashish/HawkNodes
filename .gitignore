@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Discovered model list, written at runtime from GET /v1/models.
+.models_cache.json
+
+# Never commit credentials.
+.env
+config.json
+*.key

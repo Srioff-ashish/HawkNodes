@@ -1,0 +1,6 @@
+# aiohttp, torch, numpy and pillow already ship with ComfyUI, so they are not listed here.
+pypdf
+python-docx
+
+# Optional: renders scanned PDF pages as images for vision models.
+# pymupdf

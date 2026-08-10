@@ -1,0 +1,27 @@
+[project]
+name = "hawknodes"
+version = "0.1.0"
+description = "Atlas Cloud nodes for ComfyUI — multimodal LLM (images, PDF, DOCX), text-to-image and image-to-image."
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pypdf",
+    "python-docx",
+]
+classifiers = [
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Repository = "https://github.com/Srioff-ashish/HawkNodes"
+BugTracker = "https://github.com/Srioff-ashish/HawkNodes/issues"
+
+[project.optional-dependencies]
+# Renders scanned PDF pages to images so a vision model can read them.
+scanned-pdf = ["pymupdf"]
+
+[tool.comfy]
+PublisherId = "Srioff-ashish"
+DisplayName = "HawkNodes"
+requires-comfyui = ">=0.26.0"
