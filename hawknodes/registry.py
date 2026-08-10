@@ -37,7 +37,8 @@ SIZE_DEFAULT = "default (model)"
 # Model discovery returns bare ids with no capability flags, so vision support is
 # guessed from the name. A false negative just means you use `custom` instead.
 _VISION_HINTS = re.compile(
-    r"(vl|vision|multimodal|omni|gpt-4o|gpt-4\.|gpt-5|gemini|claude|llava|pixtral|intern-?vl)",
+    r"(vl|vision|multimodal|omni|gpt-4o|gpt-4\.|gpt-5|gemini|claude|grok"
+    r"|llava|pixtral|intern-?vl|maverick|scout)",
     re.IGNORECASE,
 )
 

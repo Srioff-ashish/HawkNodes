@@ -10,6 +10,12 @@
     "vendor-prefixed; the short names in Atlas's own docs (deepseek-v3, glm, minimax)",
     "are marketing labels and are rejected with a 400.",
     "",
+    "xai/grok-4.3 is the one entry NOT confirmed against /v1/models, and it is marked",
+    "vision:true so it exposes image inputs. If it 400s, the prefix is the likely",
+    "culprit -- other providers appear as x-ai/ or xai-org/ elsewhere. Check with:",
+    "  curl -s https://api.atlascloud.ai/v1/models -H \"Authorization: Bearer $ATLAS_API_KEY\" | grep -i grok",
+    "and correct the slug here.",
+    "",
     "`params` selects which widget group a model shows in the image nodes. Only the",
     "gpt-image-2 groups are confirmed against a working implementation; `generic`",
     "sends nothing beyond model/prompt/seed unless you set a size, which keeps",
@@ -32,7 +38,8 @@
     { "slug": "Qwen/Qwen3-30B-A3B-Instruct-2507", "vision": false },
     { "slug": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B", "vision": false },
     { "slug": "zai-org/GLM-4.6", "vision": false },
-    { "slug": "MiniMaxAI/MiniMax-M2", "vision": false }
+    { "slug": "MiniMaxAI/MiniMax-M2", "vision": false },
+    { "slug": "xai/grok-4.3", "vision": true }
   ],
 
   "t2i": [
