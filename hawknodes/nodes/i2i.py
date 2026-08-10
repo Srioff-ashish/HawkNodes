@@ -123,6 +123,7 @@ class HawkAtlasI2I(IO.ComfyNode):
         )
         return await run_generation(
             payload,
+            cls=cls,
             api_url=api_url,
             api_key=api_key,
             poll_interval=poll_interval,

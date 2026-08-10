@@ -15,6 +15,10 @@ Four nodes, under **Add Node → HawkNodes → Atlas**:
 Built on ComfyUI's V3 node API, so calls are `async` — a slow generation does not
 freeze the queue, and **Cancel stops a running job** instead of waiting out the timeout.
 
+**Every node previews its result in place.** The LLM node shows the reply, the image nodes
+show what they generated, and the document loader shows the text it extracted — no need to
+wire up a Preview node to see what happened. The outputs are still there for chaining.
+
 ---
 
 ## Install

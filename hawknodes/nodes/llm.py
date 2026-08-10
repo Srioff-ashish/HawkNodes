@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 
-from comfy_api.latest import IO
+from comfy_api.latest import IO, ui
 
 from .. import registry
 from ..client import (
@@ -388,8 +388,15 @@ class HawkAtlasLLM(IO.ComfyNode):
             for warning in warnings:
                 logger.warning("HawkNodes: %s", warning)
 
+        # Show the reply on the node, so reading it does not require wiring up a
+        # preview node. Warnings go first -- they explain a disappointing answer.
+        preview = f"⚠ {' | '.join(warnings)}\n\n{text}" if warnings else text
+
         return IO.NodeOutput(
-            text, context_report, json.dumps(response, indent=2, ensure_ascii=False)
+            text,
+            context_report,
+            json.dumps(response, indent=2, ensure_ascii=False),
+            ui=ui.PreviewText(preview),
         )
 
 

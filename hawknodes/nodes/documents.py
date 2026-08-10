@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from comfy_api.latest import IO
+from comfy_api.latest import IO, ui
 
 from ..documents import DocumentPart, extract_document
 from .common import (
@@ -76,5 +76,13 @@ class HawkDocuments(IO.ComfyNode):
 
         part = extract_document(resolve_document_path(file), pages)
         combined = list(documents or []) + [part]
-        preview = "\n\n".join(item.as_context() for item in combined)
-        return IO.NodeOutput(combined, preview)
+        text = "\n\n".join(item.as_context() for item in combined)
+
+        # Show what was actually extracted -- the fastest way to spot a PDF that
+        # parsed to nothing, before you spend a call on it.
+        notes = [warning for item in combined for warning in item.warnings]
+        header = f"[{len(combined)} document(s), {len(text)} chars]"
+        if notes:
+            header += "\n⚠ " + "\n⚠ ".join(notes)
+
+        return IO.NodeOutput(combined, text, ui=ui.PreviewText(f"{header}\n\n{text}"))

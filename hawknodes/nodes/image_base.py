@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from comfy_api.latest import IO
+from comfy_api.latest import IO, ui
 
 from .. import registry
 from ..client import DEFAULT_IMAGE_URL, generate_image, resolve_api_key
@@ -157,6 +157,7 @@ def build_payload(
 async def run_generation(
     payload: dict,
     *,
+    cls: type,
     api_url: str,
     api_key: str,
     poll_interval: float,
@@ -181,4 +182,11 @@ async def run_generation(
     if "images" in payload:
         info["reference_images"] = len(payload["images"])
 
-    return IO.NodeOutput(stack_images(images), json.dumps(info, indent=2, ensure_ascii=False))
+    tensor = stack_images(images)
+    return IO.NodeOutput(
+        tensor,
+        json.dumps(info, indent=2, ensure_ascii=False),
+        # Preview on the node itself, so you can judge a result without wiring
+        # up a Save Image first.
+        ui=ui.PreviewImage(tensor, cls=cls),
+    )
