@@ -183,10 +183,5 @@ Every check reports independently, so one bad model id does not hide the rest.
 
 ---
 
-## Credits
-
-Atlas's image endpoints are undocumented beyond `model` and `prompt`; the request and
-polling shapes used here were confirmed against
-[clownvary/ComfyUI-AtlasCloud](https://github.com/clownvary/ComfyUI-AtlasCloud).
-
+ 
 MIT licensed.
